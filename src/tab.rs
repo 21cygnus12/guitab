@@ -1,5 +1,7 @@
 use iced::{Color, Point, Rectangle, Renderer, Theme, mouse, widget::canvas};
 
+const TPQN: u32 = 480;
+
 pub struct Tab {
     string_count: u8,
     measures: Vec<Measure>,
@@ -22,6 +24,12 @@ struct Measure {
 struct TimeSignature {
     numerator: u8,
     denominator: u8,
+}
+
+impl TimeSignature {
+    fn ticks(&self) -> Tick {
+        Tick(self.numerator as u32 * TPQN * 4 / self.denominator as u32)
+    }
 }
 
 struct Event {
@@ -70,5 +78,27 @@ impl<Message> canvas::Program<Message> for Tab {
         }
 
         vec![frame.into_geometry()]
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn time_signature_ticks() {
+        let ts = TimeSignature {
+            numerator: 4,
+            denominator: 4,
+        };
+
+        assert_eq!(ts.ticks().0, 1920);
+
+        let ts = TimeSignature {
+            numerator: 7,
+            denominator: 8,
+        };
+
+        assert_eq!(ts.ticks().0, 1680);
     }
 }
